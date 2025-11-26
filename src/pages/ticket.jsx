@@ -37,7 +37,7 @@ export default function TicketDetailsPage() {
     };
 
     fetchTicket();
-  }, [id]);
+  }, [id, token]);
 
   if (loading)
     return (
@@ -57,59 +57,90 @@ export default function TicketDetailsPage() {
   return (
     <>
       <Navbar />
-      <div className="max-w-3xl mx-auto p-4">
-        <button onClick={() => navigate("/")} className="btn btn-sm mb-4">
+      <div className="max-w-5xl mx-auto p-6">
+        <button onClick={() => navigate("/")} className="btn btn-ghost btn-sm mb-6 pl-0 hover:bg-transparent hover:text-primary">
           ← Back to Tickets
         </button>
 
-        <h2 className="text-2xl font-bold mb-4">Ticket Details</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            <div>
+              <h1 className="text-4xl font-bold text-base-content mb-2">{ticket.title}</h1>
+              <div className="flex items-center gap-3 text-sm text-base-content/60">
+                <span>Created {new Date(ticket.createdAt).toLocaleString()}</span>
+                <span>•</span>
+                <span>ID: {ticket._id}</span>
+              </div>
+            </div>
 
-        <div className="card bg-gray-800 shadow p-4 space-y-4">
-          <h3 className="text-xl font-semibold">{ticket.title}</h3>
-          <p>{ticket.description}</p>
-
-          {/* Conditionally render extended details */}
-          {ticket.status && (
-            <>
-              <div className="divider">Metadata</div>
-              <p>
-                <strong>Status:</strong> {ticket.status}
-              </p>
-              {ticket.priority && (
-                <p>
-                  <strong>Priority:</strong> {ticket.priority}
+            <div className="card bg-base-100 shadow-lg border border-base-200">
+              <div className="card-body">
+                <h3 className="text-lg font-semibold mb-2">Description</h3>
+                <p className="text-base-content/80 whitespace-pre-wrap leading-relaxed">
+                  {ticket.description}
                 </p>
-              )}
+              </div>
+            </div>
 
-              {ticket.relatedSkills?.length > 0 && (
-                <p>
-                  <strong>Related Skills:</strong>{" "}
-                  {ticket.relatedSkills.join(", ")}
-                </p>
-              )}
-
-              {ticket.helpfulNotes && (
-                <div>
-                  <strong>Helpful Notes:</strong>
-                  <div className="prose max-w-none rounded mt-2">
+            {ticket.helpfulNotes && (
+              <div className="alert alert-info bg-info/10 border-info/20 text-base-content shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6 text-info"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div className="w-full">
+                  <h3 className="font-bold text-info mb-1">AI Suggested Solution</h3>
+                  <div className="prose prose-sm max-w-none">
                     <ReactMarkdown>{ticket.helpfulNotes}</ReactMarkdown>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
+          </div>
 
-              {ticket.assignedTo && (
-                <p>
-                  <strong>Assigned To:</strong> {ticket.assignedTo?.email}
-                </p>
-              )}
+          {/* Sidebar Metadata */}
+          <div className="space-y-6">
+            <div className="card bg-base-200/50 shadow-sm border border-base-200">
+              <div className="card-body p-6 space-y-4">
+                <div>
+                  <label className="text-xs font-bold uppercase text-base-content/50 tracking-wider">Status</label>
+                  <div className={`mt-1 badge ${ticket.status === 'DONE' ? 'badge-success' : ticket.status === 'IN_PROGRESS' ? 'badge-warning' : 'badge-info'} badge-lg w-full py-4`}>
+                    {ticket.status || 'OPEN'}
+                  </div>
+                </div>
 
-              {ticket.createdAt && (
-                <p className="text-sm text-gray-500 mt-2">
-                  Created At: {new Date(ticket.createdAt).toLocaleString()}
-                </p>
-              )}
-            </>
-          )}
+                {ticket.priority && (
+                  <div>
+                    <label className="text-xs font-bold uppercase text-base-content/50 tracking-wider">Priority</label>
+                    <div className="mt-1 font-semibold">{ticket.priority}</div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-xs font-bold uppercase text-base-content/50 tracking-wider">Assigned To</label>
+                  <div className="mt-1 flex items-center gap-2">
+                    <div className="avatar placeholder">
+                      <div className="bg-neutral text-neutral-content rounded-full w-8">
+                        <span>{ticket.assignedTo?.email?.[0]?.toUpperCase() || "?"}</span>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium truncate">
+                      {ticket.assignedTo?.email || "Unassigned"}
+                    </span>
+                  </div>
+                </div>
+
+                {ticket.relatedSkills?.length > 0 && (
+                  <div>
+                    <label className="text-xs font-bold uppercase text-base-content/50 tracking-wider">Related Skills</label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {ticket.relatedSkills.map(skill => (
+                        <div key={skill} className="badge badge-outline badge-sm">{skill}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>
